@@ -1,0 +1,6 @@
+streamlit
+pandas
+pvlib
+matplotlib
+numpy
+tabulate
