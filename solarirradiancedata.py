@@ -121,6 +121,82 @@ ax.grid(True)
 # Show plot in Streamlit
 st.pyplot(fig)
 
+import pandas as pd
+import pvlib
+from pvlib.location import Location
+import streamlit as st
+import matplotlib.pyplot as plt
+
+# Sample DataFrame (Ensure the 'datetime' column is in datetime format and is the index)
+# df = pd.read_csv('your_file.csv')
+# df['datetime'] = pd.to_datetime(df['datetime'])
+# df.set_index('datetime', inplace=True)
+
+# Localize the time index to your time zone
+timezone = 'Europe/Dublin'
+
+# Replace with your actual latitude and longitude
+latitude = 53.350
+longitude = -6.260
+
+# Ensure the datetime index is timezone-aware (assuming UTC)
+df.index = df.index.tz_localize('UTC')
+df.index = df.index.tz_convert(timezone)
+
+# Create a Location object
+site = Location(latitude=latitude, longitude=longitude, tz=timezone)
+
+# Calculate solar position for each timestamp
+solar_position = site.get_solarposition(df.index)
+
+# Use the Erbs model to estimate DNI and DHI
+dni_dhi = pvlib.irradiance.erbs(df['G(i)'], solar_position['zenith'], df.index)
+
+# Add DNI and DHI to the DataFrame
+df['DNI'] = dni_dhi['dni']
+df['DHI'] = dni_dhi['dhi']
+
+# Define the tilt and azimuth of your solar panel
+tilt = 30
+azimuth = 180
+
+# Calculate POA irradiance
+poa = pvlib.irradiance.get_total_irradiance(
+    surface_tilt=tilt,
+    surface_azimuth=azimuth,
+    dni=df['DNI'],
+    ghi=df['G(i)'],
+    dhi=df['DHI'],
+    solar_zenith=solar_position['zenith'],
+    solar_azimuth=solar_position['azimuth']
+)
+
+df['POA_Global'] = poa['poa_global']
+
+# Resample to daily average
+daily_poa_avg = df['POA_Global'].resample('D').mean()
+
+# Plot the data
+fig, ax = plt.subplots(figsize=(12, 5))
+daily_poa_avg.plot(ax=ax, title='Daily Average POA Global Irradiance')
+ax.set_xlabel('Date')
+ax.set_ylabel('Average Irradiance (W/m²)')
+ax.grid(True)
+
+# Show plot in Streamlit
+st.pyplot(fig)
+
+
+
+
+
+
+
+
+
+
+
+
 # Assuming df is already loaded with the correct datetime index
 # Set location for Dublin
 latitude = 53.35
@@ -146,58 +222,8 @@ VI = std_measured / std_clear
 # Display the Variability Index (VI) in Streamlit
 st.write(f"**Variability Index (VI):** {VI:.4f}")
 
-# Optionally, plot the measured GHI and clearsky GHI to visualize the variability
-st.write("**Measured GHI vs Clear Sky GHI**")
-fig, ax = plt.subplots(figsize=(12, 5))
-ghi_measured.plot(kind='line', label='Measured GHI', ax=ax)
-ghi_clear.plot(kind='line', label='Clear Sky GHI', ax=ax)
-ax.set_title('Measured GHI vs Clear Sky GHI')
-ax.set_xlabel('Date')
-ax.set_ylabel('GHI (W/m²)')
-ax.legend()
-ax.grid(True)
-
-# Display the plot in Streamlit
-st.pyplot(fig)
 
 
-
-
-# Assuming your DataFrame is already loaded and contains the necessary columns
-
-# Calculate the differences (ramp rates) between consecutive GHI values (in G(i) column)
-df['Ramp_Rate'] = df['G(i)'].diff().abs()  # Absolute difference between consecutive GHI values
-
-# Group by year, month, and day to calculate DARR for each day
-darr_daily = df.groupby(['year', 'month', 'day'])['Ramp_Rate'].mean()
-
-# Convert the Series to DataFrame for better compatibility with tabulate
-darr_daily_df = darr_daily.reset_index()
-
-# Display the DARR table in a PostgreSQL-style format within Streamlit
-st.write("**Daily Average Ramp Rate (DARR)**")
-st.table(darr_daily_df)
-
-
-
-# Assuming your DataFrame is already loaded and contains the necessary columns
-
-# Calculate the differences (ramp rates) between consecutive GHI values (in G(i) column)
-df['Ramp_Rate'] = df['G(i)'].diff().abs()  # Absolute difference between consecutive GHI values
-
-# Group by year, month, and day to calculate DARR for each day
-darr_daily = df.groupby(['year', 'month', 'day'])['Ramp_Rate'].mean()
-
-# Convert the Series to DataFrame for better compatibility with tabulate
-darr_daily_df = darr_daily.reset_index()
-
-# Display the DARR table in a PostgreSQL-style format within Streamlit
-st.write("**Daily Average Ramp Rate (DARR)**")
-st.table(darr_daily_df)
-
-# Optionally, print the table in PostgreSQL-style format in the Streamlit log
-st.write("PostgreSQL-style table format:")
-st.text(tabulate(darr_daily_df, headers='keys', tablefmt='psql', showindex=False))
 
 
 
