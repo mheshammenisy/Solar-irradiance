@@ -132,16 +132,21 @@ import matplotlib.pyplot as plt
 # df['datetime'] = pd.to_datetime(df['datetime'])
 # df.set_index('datetime', inplace=True)
 
-# Localize the time index to your time zone
+# Check if the datetime index is already timezone-aware
+if df.index.tz is None:
+    # If it is not timezone-aware, localize to UTC
+    df.index = df.index.tz_localize('UTC')
+else:
+    # If it's already timezone-aware, convert it to the desired timezone
+    df.index = df.index.tz_convert('UTC')
+
+# Now convert to the desired local timezone
 timezone = 'Europe/Dublin'
+df.index = df.index.tz_convert(timezone)
 
 # Replace with your actual latitude and longitude
 latitude = 53.350
 longitude = -6.260
-
-# Ensure the datetime index is timezone-aware (assuming UTC)
-df.index = df.index.tz_localize('UTC')
-df.index = df.index.tz_convert(timezone)
 
 # Create a Location object
 site = Location(latitude=latitude, longitude=longitude, tz=timezone)
