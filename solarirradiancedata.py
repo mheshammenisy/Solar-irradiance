@@ -64,59 +64,58 @@ st.pyplot(fig)
 
 
 
+# Assuming df is already loaded with 'G(i)' column and datetime index
 # Localize the time index to the timezone
-    timezone = 'Europe/Dublin'
-    latitude = 53.350
-    longitude = -6.260
+timezone = 'Europe/Dublin'
+latitude = 53.350
+longitude = -6.260
 
-    # Localize naive timestamps to UTC (assuming input is in UTC)
-    df.index = df.index.tz_localize('UTC')
-    # Convert to local timezone
-    df.index = df.index.tz_convert(timezone)
+# Ensure the datetime index is timezone-aware, assuming the input is in UTC
+df.index = df.index.tz_localize('UTC')
+df.index = df.index.tz_convert(timezone)
 
-    # Create a Location object
-    site = Location(latitude, longitude, tz=timezone)
+# Create a Location object
+site = Location(latitude, longitude, tz=timezone)
 
-    # Calculate solar position for each timestamp
-    solar_position = site.get_solarposition(df.index)
+# Calculate solar position for each timestamp
+solar_position = site.get_solarposition(df.index)
 
-    # Use the Erbs model to estimate DNI and DHI
-    dni_dhi = pvlib.irradiance.erbs(df['G(i)'], solar_position['zenith'], df.index)
+# Use the Erbs model to estimate DNI and DHI
+dni_dhi = pvlib.irradiance.erbs(df['G(i)'], solar_position['zenith'], df.index)
 
-    # Add DNI and DHI to the DataFrame
-    df['DNI'] = dni_dhi['dni']
-    df['DHI'] = dni_dhi['dhi']
+# Add DNI and DHI to the DataFrame
+df['DNI'] = dni_dhi['dni']
+df['DHI'] = dni_dhi['dhi']
 
-    # Define the tilt and azimuth of your solar panel
-    tilt = 30
-    azimuth = 180
+# Define the tilt and azimuth of your solar panel
+tilt = 30
+azimuth = 180
 
-    # Calculate POA irradiance
-    poa = pvlib.irradiance.get_total_irradiance(
-        surface_tilt=tilt,
-        surface_azimuth=azimuth,
-        dni=df['DNI'],
-        ghi=df['G(i)'],
-        dhi=df['DHI'],
-        solar_zenith=solar_position['zenith'],
-        solar_azimuth=solar_position['azimuth']
-    )
+# Calculate POA irradiance
+poa = pvlib.irradiance.get_total_irradiance(
+    surface_tilt=tilt,
+    surface_azimuth=azimuth,
+    dni=df['DNI'],
+    ghi=df['G(i)'],
+    dhi=df['DHI'],
+    solar_zenith=solar_position['zenith'],
+    solar_azimuth=solar_position['azimuth']
+)
 
-    # Add POA Global to the DataFrame
-    df['POA_Global'] = poa['poa_global']
+df['POA_Global'] = poa['poa_global']
 
-    # Resample to monthly average
-    monthly_poa_avg = df['POA_Global'].resample('M').mean()
+# Resample to monthly average
+monthly_poa_avg = df['POA_Global'].resample('M').mean()
 
-    # Plot the data
-    fig, ax = plt.subplots(figsize=(12, 5))
-    monthly_poa_avg.plot(ax=ax, title='Monthly Average POA Global Irradiance')
-    ax.set_xlabel('Month')
-    ax.set_ylabel('Average Irradiance (W/m²)')
-    ax.grid(True)
+# Plot the data
+fig, ax = plt.subplots(figsize=(12, 5))
+monthly_poa_avg.plot(ax=ax, title='Monthly Average POA Global Irradiance')
+ax.set_xlabel('Month')
+ax.set_ylabel('Average Irradiance (W/m²)')
+ax.grid(True)
 
-    # Show plot in Streamlit
-    st.pyplot(fig)
+# Show plot in Streamlit
+st.pyplot(fig)
 
 # Assuming df is already loaded with the correct datetime index
 # Set location for Dublin
