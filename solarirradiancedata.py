@@ -63,7 +63,11 @@ ax.grid(True)
 st.pyplot(fig)
 
 
-
+import pandas as pd
+import pvlib
+from pvlib.location import Location
+import streamlit as st
+import matplotlib.pyplot as plt
 # Assuming df is already loaded with 'G(i)' column and datetime index
 # Localize the time index to the timezone
 timezone = 'Europe/Dublin'
