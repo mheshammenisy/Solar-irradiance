@@ -65,17 +65,17 @@ st.pyplot(fig)
 # Localize the time index to your time zone
 timezone = 'Europe/Dublin'
 
-# Replace with your actual latitude and longitude
-latitude = 53.350
-longitude = -6.260
+import pvlib
+from pvlib.location import Location
 
-# Assuming df is already loaded, localize timestamps to UTC and convert to local timezone
-df.index = pd.to_datetime(df.index)
-df.index = df.index.tz_localize('UTC')
-df.index = df.index.tz_convert(timezone)
+# Define latitude, longitude, and timezone
+latitude = 53.350  # Replace with your actual latitude
+longitude = -6.260  # Replace with your actual longitude
+timezone = 'Europe/Dublin'  # Replace with your actual timezone
 
-# Create a Location object for the site
+# Create Location object
 site = Location(latitude, longitude, tz=timezone)
+
 
 # Calculate solar position for each timestamp
 solar_position = site.get_solarposition(df.index)
