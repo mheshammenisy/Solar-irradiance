@@ -10,7 +10,7 @@ import streamlit as st
 
 
 # Directly load the CSV from the specified path
-file_path = "C:/Users/mhesh/Documents/Aces3b/Timeseries_53.120_-9.669_SA3_37deg_5deg_2023_2023.csv"
+file_path = "Timeseries_53.120_-9.669_SA3_37deg_5deg_2023_2023.csv"
 
 # Read the CSV into a DataFrame
 df = pd.read_csv(file_path)
