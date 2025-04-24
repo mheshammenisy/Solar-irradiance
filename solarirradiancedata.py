@@ -11,7 +11,7 @@ import streamlit as st
 st.set_page_config(page_title="Solar Irradiance Analysis", page_icon="🌞", layout="wide")
 
 # Add a header for the dashboard
-st.title("Solar Irradiance Analysis Dashboard")
+st.title("Solar Irradiance Analysis Dashboard in store location in Dublin Ireland 2023 statistics")
 st.markdown("""
     This dashboard presents solar irradiance data, including GHI, POA, and the variability index, 
     visualized over daily and monthly intervals for the given location. 
