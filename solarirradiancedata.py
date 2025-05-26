@@ -33,6 +33,8 @@ df['datetime'] = pd.to_datetime(df['time'], format='%Y%m%d:%H%M')
 df.set_index('datetime', inplace=True)
 df['month'] = df.index.month
 df['day'] = df.index.day
+df['hour'] = df.index.hour
+
 
 # Download option
 st.sidebar.download_button("Download Filtered CSV", df.to_csv().encode(), file_name="filtered_irradiance_data.csv", mime="text/csv")
@@ -46,11 +48,11 @@ st.dataframe(df_filtered.head(10), use_container_width=True)
 # Diurnal plot
 if display_diurnal:
     st.subheader(f"Average Daily GHI - {datetime(1900, selected_month, 1).strftime('%B')}")
-    daily_avg = df_filtered.groupby('day')['G(i)'].mean()
+    daily_avg = df_filtered.groupby('hour')['G(i)'].mean()
     fig1, ax1 = plt.subplots()
     daily_avg.plot(marker='o', color='dodgerblue', lw=2, ax=ax1)
-    ax1.set_title("Daily GHI")
-    ax1.set_xlabel("Day")
+    ax1.set_title("Hourly GHI")
+    ax1.set_xlabel("Hour")
     ax1.set_ylabel("GHI (W/m²)")
     ax1.grid(True, linestyle='--', alpha=0.7)
     st.pyplot(fig1)
