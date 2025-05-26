@@ -4,3 +4,4 @@ pvlib
 matplotlib
 numpy
 tabulate
+plotly
